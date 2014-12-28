@@ -31,8 +31,10 @@ sub connect {
     }
 
     return undef unless $self->{conn};
-    bless $self, $class;
     $self->{dbd} = $self->{conn}->dbh->{Driver}->{Name};
+    bless $self, $class;
+
+    $self->setup_statement_cache;
 
     return $self;
 }

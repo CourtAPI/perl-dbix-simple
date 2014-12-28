@@ -49,16 +49,16 @@ sub connect {
     my $self = { lc_columns => 1, result_class => 'DBIx::Simple::Result' };
     if (defined $arguments[0] and UNIVERSAL::isa($arguments[0], 'DBI::db')) {
         $self->{dont_disconnect} = 1;
-	$self->{dbh} = shift @arguments;
-	Carp::carp("Additional arguments for $class->connect are ignored")
-	    if @arguments;
+      	$self->{dbh} = shift @arguments;
+      	Carp::carp("Additional arguments for $class->connect are ignored")
+	       if @arguments;
     } else {
-	$arguments[3]->{PrintError} = 0
-	    unless defined $arguments[3] and exists $arguments[3]{PrintError};
-        $arguments[3]->{RaiseError} = 1
+	    $arguments[3]->{PrintError} = 0
+	      unless defined $arguments[3] and exists $arguments[3]{PrintError};
+      $arguments[3]->{RaiseError} = 1
             unless $no_raiseerror
             or defined $arguments[3] and exists $arguments[3]{RaiseError};
-	$self->{dbh} = DBI->connect(@arguments);
+      $self->{dbh} = DBI->connect(@arguments);
     }
 
     return undef unless $self->{dbh};
@@ -66,11 +66,17 @@ sub connect {
     $self->{dbd} = $self->{dbh}->{Driver}->{Name};
     bless $self, $class;
 
-    $statements{$self}      = {};
-    $old_statements{$self}  = [];
-    $keep_statements{$self} = 16;
+    $self->setup_statement_cache;
 
     return $self;
+}
+
+sub setup_statement_cache {
+  my $self = shift;
+  
+  $statements{$self}      = {};
+  $old_statements{$self}  = [];
+  $keep_statements{$self} = 16;
 }
 
 sub new {
@@ -1128,4 +1134,3 @@ L<perl>, L<perlref>
 L<DBI>, L<DBIx::Simple::Examples>, L<SQL::Abstract>, L<DBIx::XHTML_Table>
 
 =cut
-
