@@ -1,4 +1,8 @@
 package DBIx::Simple::Result::RowObject;
+
+use strict;
+use warnings;
+
 use base 'Object::Accessor';
 sub new {
     my ($class, %args) = @_;
