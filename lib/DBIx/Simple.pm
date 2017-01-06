@@ -149,6 +149,7 @@ sub _die {
 
 ### public methods
 
+#@returns DBIx::Simple::Result
 sub query {
     my ($self, $query, @binds) = @_;
     $self->{success} = 0;
