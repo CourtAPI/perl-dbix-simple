@@ -3,7 +3,7 @@ use strict;
 use DBI;
 use Carp ();
 
-$DBIx::Simple::VERSION = '1.36';
+$DBIx::Simple::VERSION = '1.37';
 $Carp::Internal{$_} = 1
     for qw(DBIx::Simple DBIx::Simple::Result DBIx::Simple::DeadObject);
 
@@ -967,6 +967,7 @@ Returns a list of instances of $class. See "Object construction". Possibly
 affected by C<lc_columns>.
 
 =item C<map>
+
 =item C<group>
 
 Constructs a simple hash, using the two columns as key/value pairs. Should only
@@ -977,6 +978,7 @@ With unique keys, use C<map>. With non-unique keys, use C<group>, which gives
 an array of values per key.
 
 =item C<map_hashes($column_name)>
+
 =item C<group_arrays($column_number)>
 
 Constructs a hash keyed by the values in the chosen column, and returns a list
@@ -987,6 +989,7 @@ With unique keys, use C<map_hashes>, which gives a single hash per key. With
 non-unique keys, use C<group_hashes>, which gives an array of hashes per key.
 
 =item C<map_arrays($column_number)>
+
 =item C<group_arrays($column_number)>
 
 Constructs a hash keyed by the values in the chosen column, and returns a list

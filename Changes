@@ -3,6 +3,9 @@ Revision history for Perl extension DBIx::Simple.
 Incompatible changes are marked with "!!". Incompatibility with and changes in
 "undocumented features" are not always specifically mentioned here.
 
+1.37  2017-12-08 23:49
+        - POD syntax fix
+
 1.36  2017-12-08 21:23
         - $result->object and $result->objects now load any module on demand.
           (Suggested by Krasimir Berov.)
