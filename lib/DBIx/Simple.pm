@@ -73,7 +73,7 @@ sub connect {
 
 sub setup_statement_cache {
   my $self = shift;
-  
+
   $statements{$self}      = {};
   $old_statements{$self}  = [];
   $keep_statements{$self} = 16;
@@ -228,6 +228,15 @@ sub DESTROY {
 }
 
 ### public methods wrapping SQL::Abstract
+#@returns DBIx::Simple::Result
+sub select;
+#@returns DBIx::Simple::Result
+sub insert;
+#@returns DBIx::Simple::Result
+sub update;
+#@returns DBIx::Simple::Result
+sub delete;
+
 
 for my $method (qw/select insert update delete/) {
     no strict 'refs';
