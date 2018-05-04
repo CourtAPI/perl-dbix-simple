@@ -257,7 +257,7 @@ sub mysql_upsert {
     my $update_command = "ON DUPLICATE KEY UPDATE "
       . join ",", map { "$_ = VALUES ( $_ )" } @keys;
 
-    return ("$query $update_command", @binds);
+    return $self->query("$query $update_command", @binds);
 }
 
 
