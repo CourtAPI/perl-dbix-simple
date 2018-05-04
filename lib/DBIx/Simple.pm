@@ -246,6 +246,21 @@ for my $method (qw/select insert update delete/) {
     }
 }
 
+#@returns DBIx::Simple::Result
+sub mysql_upsert {
+    my $self = shift;
+    my ( $table, $fieldvals ) = @_;
+    my ($query, @binds) = $self->abstract->insert(@_);
+
+    # auto deduce columns
+    my @keys = keys %$fieldvals;
+    my $update_command = "ON DUPLICATE KEY UPDATE "
+      . join ",", map { "$_ = VALUES ( $_ )" } @keys;
+
+    return ("$query $update_command", @binds);
+}
+
+
 ### public method wrapping SQL::Interp
 
 sub iquery {
