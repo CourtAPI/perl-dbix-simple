@@ -3,7 +3,7 @@ use strict;
 use DBI;
 use Carp ();
 
-$DBIx::Simple::VERSION = '1.35';
+$DBIx::Simple::VERSION = '1.40';
 $Carp::Internal{$_} = 1
     for qw(DBIx::Simple DBIx::Simple::Result DBIx::Simple::DeadObject);
 
@@ -33,6 +33,14 @@ sub _swap {
     %$hash2 = %$temphash;
     bless $hash2, $tempref;
 }
+
+# Used by DBIx::Simple::Connector
+sub _clear_cache {
+    my $self = shift;
+    delete $statements{$self};
+    delete $old_statements{$self};
+}
+
 
 ### constructor
 
@@ -83,7 +91,7 @@ sub abstract : lvalue {
 
 sub error {
     my ($self) = @_;
-    return 'DBI error: ' . (ref $self ? $self->{dbh}->errstr : $DBI::errstr);
+    return 'DBI error: ' . (ref $self ? $self->dbh->errstr : $DBI::errstr);
 }
 
 sub dbh { $_[0]->{dbh} }
@@ -121,7 +129,7 @@ sub _die {
     unless ($self->{dont_disconnect}) {
         # Conditional, because destruction order is not guaranteed
         # during global destruction.
-        $self->{dbh}->disconnect() if defined $self->{dbh};
+        $self->dbh->disconnect() if defined $self->dbh;
     }
 
     _swap(
@@ -150,7 +158,7 @@ sub query {
         $st = splice(@$old, $i, 1)->[1];
         $sth = $st->{sth};
     } else {
-        eval { $sth = $self->{dbh}->prepare($query) } or do {
+        eval { $sth = $self->dbh->prepare($query) } or do {
             if ($@) {
                 $@ =~ s/ at \S+ line \d+\.\n\z//;
                 Carp::croak($@);
@@ -184,11 +192,11 @@ sub query {
     return bless { st => $st, lc_columns => $self->{lc_columns} }, $self->{result_class};
 }
 
-sub begin_work     { $_[0]->{dbh}->begin_work }
+sub begin_work     { $_[0]->dbh->begin_work }
 sub begin          { $_[0]->begin_work        }
-sub commit         { $_[0]->{dbh}->commit     }
-sub rollback       { $_[0]->{dbh}->rollback   }
-sub func           { shift->{dbh}->func(@_)   }
+sub commit         { $_[0]->dbh->commit     }
+sub rollback       { $_[0]->dbh->rollback   }
+sub func           { shift->dbh->func(@_)   }
 
 sub last_insert_id {
     my ($self) = @_;
@@ -198,7 +206,7 @@ sub last_insert_id {
 	"--this is only $self->{dbi_version}, stopped"
     );
 
-    return shift->{dbh}->last_insert_id(@_);
+    return shift->dbh->last_insert_id(@_);
 }
 
 sub disconnect {
@@ -600,6 +608,11 @@ DBIx::Simple - Very complete easy-to-use OO interface to DBI
     $db->func(...)          $db->last_insert_id
 
     $result = $db->query(...)
+
+=head2 DBIx::Simple + DBIx::Connector
+
+  $db = DBIx::Simple::Connector->new($conn);
+  $db = DBIx::Simple::Connector->new($dsn,$username,$password,\%args);
 
 =head2 DBIx::SImple + SQL::Interp
 
@@ -1008,6 +1021,23 @@ C<table> and C<box> require Anno Siegel's Text::Table, which is available from
 CPAN.
 
 =back
+
+=head2 DBIx::Simple::Connector
+
+L<DBIx::Simple::Connector> allows you to initialize DBIx::Simple with a
+L<DBIx::Connector> object instead of a direct database handle, and otherwise
+works the same. Benefits include helping you automatically re-connect to the
+database if the connection is dropped, and potentially avoiding re-checking if
+the database handle is working by issuing issuing a "ping" call before every
+query.
+
+Connecting to a database can be expensive; you don't want your application to
+re-connect every time you need to run a query. The efficient thing to do is to
+hang on to a database handle to maintain a connection to the database in order
+to minimize that overhead. DBIx::Connector lets you do that without having to
+worry about dropped or corrupted connections.
+
+See L<DBIx::Simple::Connector> and L<DBIx::Connector> for further details.
 
 =head2 Object construction
 
