@@ -92,7 +92,16 @@ sub result_class    : lvalue { $_[0]->{result_class} }
 
 sub abstract : lvalue {
     require SQL::Abstract;
+    require SQL::Abstract::Plugin::InsertMulti;
+
     $_[0]->{abstract} ||= SQL::Abstract->new;
+
+    # ::InsertMulti imports into SQL::Abstract.  Import it if necessary
+    unless ( $_[0]->{abstract}->can('insert_multi') ) {
+        SQL::Abstract::Plugin::InsertMulti->import;
+    }
+
+    return $_[0]->{abstract};
 }
 
 sub error {
@@ -236,9 +245,11 @@ sub insert;
 sub update;
 #@returns DBIx::Simple::Result
 sub delete;
+#@returns DBIx::Simple::Result
+sub insert_multi;
 
 
-for my $method (qw/select insert update delete/) {
+for my $method (qw/select insert insert_multi update delete/) {
     no strict 'refs';
     *$method = sub {
         my $self = shift;
